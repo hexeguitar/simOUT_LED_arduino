@@ -17,5 +17,5 @@ License:
 Creative Commons - Attribution - ShareAlike 3.0
 [http://creativecommons.org/licenses/by-sa/3.0/](http://creativecommons.org/licenses/by-sa/3.0/)
 
-[pic1]: pics/roMicro_simOUTleds.png "ProMico as simOUT LED driver"
+[pic1]: pics/ProMicro_simOUTleds.png "ProMico as simOUT LED driver"
 

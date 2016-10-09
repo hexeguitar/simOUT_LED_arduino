@@ -61,7 +61,7 @@ void allOff(void);
 const uint8_t digitArray[10] PROGMEM = {0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0xFF,0x6F};
 const int numOfDigits = 5;
 int c_anodeDrivers[numOfDigits] = {2,3,4,5,6};
-int ledDrivers[8] = {8,7,14,15,18,9,10,16};
+int ledDrivers[8] = {16,10,9,18,15,14,7,8};
 static volatile uint8_t ledState[numOfDigits] = {0x00,0x00,0x00,0x00,0x00};
 static volatile uint8_t addrBuff[numOfDigits] = {0x00,0x00,0x00,0x00,0x00};
 static volatile uint8_t *ledStatePtr = ledState;

@@ -1,9 +1,9 @@
 /*
-  #############################################################
-  #                   simOUT LED Driver                       #
-  #                 for M32U4 based Arduino                   #                   
-  #                  (c) 2016 Piotr Zapart                    #
-  #############################################################
+	#############################################################
+	#                   simOUT LED Driver                       #
+	#                 for M32U4 based Arduino                   #                   
+	#                  (c) 2016 Piotr Zapart                    #
+	#############################################################
 
 */
 #include "typedefs.h"
@@ -11,20 +11,20 @@
 #include <avr/pgmspace.h>
 
 /*
-  Master module receives the data from USB/HID serial port (Serial1)
-  and pases it through to hardware Serial to be sent to other slave modules.
-  Only M32U4 based can be used as master.
-  
-  Slave module receives data from stock Serial port only. 
-  
-  Comment out the MASTER_MODULE to set the module to master, 
-  comment it to set the modula as slave
+	Master module receives the data from USB/HID serial port (Serial1)
+	and pases it through to hardware Serial to be sent to other slave modules.
+	Only M32U4 based can be used as master.
+	
+	Slave module receives data from stock Serial port only. 
+	
+	Comment out the MASTER_MODULE to set the module to master, 
+	comment it to set the modula as slave
 */
 
-#define MASTER_MODULE
+//#define MASTER_MODULE
 
 /*
-   ### SEGMENT CONNECTIONS###
+   ### SEGMENT CONNECTIONS ###
    connect through 220-470R resistors
    A = D8
    B = D7
@@ -51,7 +51,7 @@
 */
 
 // Device ID address
-const uint8_t devAddress = 21;
+const uint8_t devAddress = 22;
 
 void processData(uint8_t dataIn);
 void initPorts(void);
@@ -72,18 +72,18 @@ static volatile uint8_t *ledStatePtr = ledState;
 // ###########################################################
 void setup() 
 {
-  initPorts();
-  
-  Serial.begin(57600,SERIAL_8N2);
-#if defined MASTER_MODULE 
+	initPorts();
+	
+	Serial.begin(57600,SERIAL_8N2);
+#if defined MASTER_MODULE	
     Serial1.begin(57600,SERIAL_8N2);
 #endif
-  
+	
   Timer1.initialize(625);
-  Timer1.attachInterrupt(ledMux);
-  
-  displayNumber(devAddress,addrBuff);
-  
+	Timer1.attachInterrupt(ledMux);
+	
+	displayNumber(devAddress,addrBuff);
+	
 }
 // ###########################################################
 void loop() 
@@ -109,8 +109,8 @@ void processData(uint8_t dataIn)
     static uint8_t incBytes = 0, index = 0;    //number of incoming data bytes
     static uint8_t dataBuffer[5];
     uint8_t i;
-  
-#if defined MASTER_MODULE 
+	
+#if defined MASTER_MODULE	
     Serial1.write(dataIn);    //pass the data to Serial1 over, only for Master module
 #endif
 
@@ -126,11 +126,11 @@ void processData(uint8_t dataIn)
         case WAIT4DATA:
                         dataBuffer[index++] = dataIn;
                         if (index == incBytes)  
-            {
-              state = PACKET_CMPLT;
-              index = 0;              
-            } 
-            
+						{
+							state = PACKET_CMPLT;
+							index = 0;							
+						}	
+						
                         break;
        case PACKET_CMPLT: 
                         break;
@@ -138,106 +138,106 @@ void processData(uint8_t dataIn)
     // Process data stored in buffer
     if (state == PACKET_CMPLT)
     {
-    switch (dataBuffer[0])            //command
-    {
-      case LED_ON:
-            bitSet(ledState[(dataBuffer[1]>>3)],(dataBuffer[1]%8));
-            break;
-      case LED_OFF:
-            bitClear(ledState[(dataBuffer[1]>>3)],(dataBuffer[1]%8));
-            break;
-      case LED_ON_ALL:
-            allOn();
-            break;
-      case LED_OFF_ALL:
-            allOff();
-            break;
-      case LED7_DIGIT:
-            ledState[dataBuffer[1]] = dataBuffer[2];
-            break;
-      case SHOW_ID:
-            ledStatePtr = addrBuff;
-            break;
-      case HIDE_ID:
-            ledStatePtr = ledState;
-            break;            
-    }
+		switch (dataBuffer[0])						//command
+		{
+			case LED_ON:
+						bitSet(ledState[(dataBuffer[1]>>3)],(dataBuffer[1]%8));
+						break;
+			case LED_OFF:
+						bitClear(ledState[(dataBuffer[1]>>3)],(dataBuffer[1]%8));
+						break;
+			case LED_ON_ALL:
+						allOn();
+						break;
+			case LED_OFF_ALL:
+						allOff();
+						break;
+			case LED7_DIGIT:
+						ledState[dataBuffer[1]] = dataBuffer[2];
+						break;
+			case SHOW_ID:
+						ledStatePtr = addrBuff;
+						break;
+			case HIDE_ID:
+						ledStatePtr = ledState;
+						break;						
+		}
         state = RECV_IDLE;
     }  
 }
 // ###########################################################
 void ledMux(void)
 {
-  static volatile uint8_t anodeCnt=4;
-  uint8_t i;
-  
-  digitalWrite(c_anodeDrivers[anodeCnt++],HIGH);
-  if (anodeCnt >= numOfDigits)  anodeCnt = 0;
-  
-  for (i=0;i<8;i++)
-  {
-    if (ledStatePtr[anodeCnt] & (1<<i)) digitalWrite(ledDrivers[i],LOW);
-    else                                digitalWrite(ledDrivers[i],HIGH);
-  }
-  // anode switch 
-  digitalWrite(c_anodeDrivers[anodeCnt],LOW);
+	static volatile uint8_t anodeCnt=4;
+	uint8_t i;
+	
+	digitalWrite(c_anodeDrivers[anodeCnt++],HIGH);
+	if (anodeCnt >= numOfDigits)	anodeCnt = 0;
+	
+	for (i=0;i<8;i++)
+	{
+		if (ledStatePtr[anodeCnt] & (1<<i))	digitalWrite(ledDrivers[i],LOW);
+		else								digitalWrite(ledDrivers[i],HIGH);
+	}
+	// anode switch	
+	digitalWrite(c_anodeDrivers[anodeCnt],LOW);
 }
 // ###########################################################
 void initPorts(void)
 {
-  uint8_t i;
-  
-  for (i=0;i<8;i++)
-  {
-    pinMode(ledDrivers[i],OUTPUT);
-  }
-  for (i=0;i<numOfDigits;i++)
-  {
-    pinMode(c_anodeDrivers[i],OUTPUT);
-  }
+	uint8_t i;
+	
+	for (i=0;i<8;i++)
+	{
+		pinMode(ledDrivers[i],OUTPUT);
+	}
+	for (i=0;i<numOfDigits;i++)
+	{
+		pinMode(c_anodeDrivers[i],OUTPUT);
+	}
 }
 // ###########################################################
 void displayNumber(uint8_t number, volatile uint8_t *bfPtr)
 {
-  uint8_t i = 0;
-  uint8_t digit = 0;
-  
-  for (i=0;i<numOfDigits;i++)
-  {
-    bfPtr[i] = 0x00;
-  }
-  i=0;
-  while (i<3)
-  {
-    digit = number%10;
-    if (i && digit==0)
-    {
-      bfPtr[i] = 0x00;
-    }
-    else
-    {
-      bfPtr[i] = pgm_read_byte_near(&digitArray[digit]);
-    }
-    number /= 10;
-    i++;
-  }
+	uint8_t i = 0;
+	uint8_t digit = 0;
+	
+	for (i=0;i<numOfDigits;i++)
+	{
+		bfPtr[i] = 0x00;
+	}
+	i=0;
+	while (i<3)
+	{
+		digit = number%10;
+		if (i && digit==0)
+		{
+			bfPtr[i] = 0x00;
+		}
+		else
+		{
+			bfPtr[i] = pgm_read_byte_near(&digitArray[digit]);
+		}
+		number /= 10;
+		i++;
+	}
 }
 // ###########################################################
 void allOn(void)
 {
-  uint8_t i;
-  for (i=0;i<numOfDigits;i++)
-  {
-    ledState[i] = 0xFF;
-  }
+	uint8_t i;
+	for (i=0;i<numOfDigits;i++)
+	{
+		ledState[i] = 0xFF;
+	}
 }
 // ###########################################################
 void allOff(void)
 {
-  uint8_t i;
-  for (i=0;i<numOfDigits;i++)
-  {
-    ledState[i] = 0x00;
-  } 
+	uint8_t i;
+	for (i=0;i<numOfDigits;i++)
+	{
+		ledState[i] = 0x00;
+	}	
 }
 // ###########################################################

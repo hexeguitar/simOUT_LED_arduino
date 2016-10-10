@@ -110,16 +110,14 @@ void processData(uint8_t dataIn)
     static uint8_t dataBuffer[5];
     uint8_t i;
   
-#if defined MASTER_MODULE 
-    Serial1.write(dataIn);    //pass the data to Serial1 over, only for Master module
-#else
+    // Echo the incoming bytes to TX, used for master->slave or slave->slave communication
+  
     #if defined(__AVR_ATmega32U4__)
-        Serial1.write(dataIn);     //Slave modules echo the bytes to TX - daisy chain Slave->Slave connection
+        Serial1.write(dataIn);    
     #endif
     #if defined (__AVR_ATmega328P__)
-        Serial.write(dataIn);     //Slave modules echo the bytes to TX - daisy chain Slave->Slave connection
+        Serial.write(dataIn);    
     #endif
-#endif
 
     switch (state)
     {

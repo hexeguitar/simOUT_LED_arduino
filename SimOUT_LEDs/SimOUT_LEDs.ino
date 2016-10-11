@@ -75,8 +75,8 @@ void setup()
   initPorts();
   
   Serial.begin(57600,SERIAL_8N2);
-#if defined MASTER_MODULE 
-    Serial1.begin(57600,SERIAL_8N2);
+#if defined(__AVR_ATmega32U4__)
+  Serial1.begin(57600,SERIAL_8N2);
 #endif
   
   Timer1.initialize(625);
